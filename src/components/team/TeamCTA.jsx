@@ -20,7 +20,6 @@ export default function TeamCTA() {
         </button>
         
         <div className="flex gap-8 text-[30px]">
-          {/* Twitter */}
           <a href="#" className="text-[#55ACEF] hover:scale-110 transition-transform">
             <FaTwitter />
           </a>

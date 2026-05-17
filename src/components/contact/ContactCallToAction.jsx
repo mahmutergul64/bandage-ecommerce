@@ -7,22 +7,18 @@ export default function ContactCallToAction() {
     <div className="w-full bg-white pt-24 pb-16 md:py-24">
       <div className="container mx-auto px-4 flex flex-col items-center text-center">
         
-        {/* BAŞLIK */}
         <h2 className="text-[#252B42] text-[40px] md:text-[58px] font-bold leading-[50px] md:leading-tight mb-6 max-w-[260px] md:max-w-none mx-auto">
           Get answers to all your questions.
         </h2>
 
-        {/* PARAGRAF */}
         <p className="text-[#737373] text-[20px] font-medium leading-[30px] tracking-[0.2px] mb-10 max-w-[287px] md:max-w-[600px] mx-auto">
           Problems trying to resolve the conflict between the two major realms of Classical physics:
         </p>
 
-        {/* BUTON */}
         <button className="bg-[#23A6F0] hover:bg-blue-500 text-white font-bold py-4 px-10 rounded-[5px] text-sm tracking-widest transition-colors mb-16 shadow-sm">
           CONTACT OUR COMPANY
         </button>
 
-        {/* SOSYAL MEDYA İKONLARI */}
         <div className="flex gap-8 items-center justify-center">
           
           <a href="#" className="text-[#BDBDBD] hover:text-[#23A6F0] transition-colors">
