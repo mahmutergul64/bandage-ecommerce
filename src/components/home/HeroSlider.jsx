@@ -38,9 +38,9 @@ export default function HeroSlider() {
         {slides.map((slide) => (
           <div key={slide.id} className="w-full h-full flex-shrink-0 relative flex items-center">
             <div 
-              className="absolute inset-0 w-full h-full bg-cover bg-[80%_10%] lg:bg-center"
-              style={{ backgroundImage: `url(${slide.bg})` }}
-            ></div>
+  className="absolute inset-0 w-full h-full bg-cover bg-[50%_0%] lg:bg-[50%_0%]"
+  style={{ backgroundImage: `url(${slide.bg})` }}
+></div>
             
             <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-transparent lg:bg-black/10"></div>
 
