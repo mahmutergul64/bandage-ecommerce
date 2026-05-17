@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ChevronDown, User, Search, ShoppingCart, Heart, Phone, Mail, Package, LogOut } from 'lucide-react'; 
+import { ChevronDown, User, Search, ShoppingCart, Heart, Phone, Mail, Package, LogOut, Menu, X } from 'lucide-react'; 
 import { FaInstagram, FaYoutube, FaFacebook, FaTwitter } from 'react-icons/fa'; 
 import { fetchCategories } from '../store/actions/productActions';
 
@@ -30,6 +30,9 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  
+  // Mobil Menü State'i
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (categories.length === 0) {
@@ -55,8 +58,13 @@ export default function Header() {
     window.location.reload();
   };
 
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <header className="w-full bg-white relative z-[1000]">
+      {/* En Üst İnce Şerit (Mobilde Gizli) */}
       <div className="hidden lg:flex bg-[#252B42] text-white py-3">
         <div className="container mx-auto px-4 max-w-[1050px] flex justify-between items-center text-xs font-bold">
           <div className="flex items-center gap-5">
@@ -82,9 +90,18 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Ana Navigasyon Alanı */}
       <div className="container mx-auto px-4 max-w-[1050px] py-4 flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold text-[#252B42]">Bandage</Link>
         
+        {/* Mobil Hamburger İkonu */}
+        <div className="md:hidden flex items-center">
+          <button onClick={toggleMobileMenu} className="text-[#737373] hover:text-[#252B42] focus:outline-none transition-colors">
+            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
+
+        {/* Masaüstü Menü Linkleri (Mobilde Gizli) */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-[#737373]">
           <Link to="/" className="hover:text-[#23A6F0]">Home</Link>
           
@@ -139,7 +156,8 @@ export default function Header() {
           <Link to="/pages" className="hover:text-[#23A6F0]">Pages</Link>
         </nav>
 
-        <div className="flex items-center gap-4 text-[#23A6F0] font-bold text-sm">
+        {/* Masaüstü Sağ Taraf - Kullanıcı, Sepet, Favori (Mobilde Gizli) */}
+        <div className="hidden md:flex items-center gap-4 text-[#23A6F0] font-bold text-sm">
           {user.token ? (
             <div className="relative">
               <div 
@@ -286,6 +304,53 @@ export default function Header() {
             )}
           </div>
           
+        </div>
+      </div>
+
+      <div 
+        className={`md:hidden absolute w-full left-0 top-full bg-white transition-all duration-300 ease-in-out shadow-lg z-[1001] ${
+          isMobileMenuOpen ? 'max-h-[800px] opacity-100 py-8 border-t border-gray-100' : 'max-h-0 opacity-0 overflow-hidden py-0'
+        }`}
+      >
+        <div className="flex flex-col items-center space-y-6">
+          <Link to="/" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Home</Link>
+          <Link to="/shop" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Shop</Link>
+          <Link to="/about" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">About</Link>
+          <Link to="/blog" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Blog</Link>
+          <Link to="/contact" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Contact</Link>
+          <Link to="/pages" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Pages</Link>
+
+          <div className="flex flex-col items-center space-y-4 text-[#23A6F0] pt-4 w-full px-6">
+            
+            {user.token ? (
+              <div className="flex flex-col items-center gap-4 w-full border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-2 text-[20px] font-bold text-[#252B42]">
+                  <img src={user.gravatar || `https://ui-avatars.com/api/?name=${user.name}&background=23A6F0&color=fff`} className="w-10 h-10 rounded-full" alt="avatar" />
+                  <span>{user.name}</span>
+                </div>
+                <Link to="/my-orders" onClick={toggleMobileMenu} className="flex items-center gap-2 text-[20px] text-[#737373]">
+                  <Package size={24} className="text-[#23A6F0]" /> My Orders
+                </Link>
+                <button onClick={() => { toggleMobileMenu(); handleLogout(); }} className="flex items-center gap-2 text-[20px] text-red-500">
+                  <LogOut size={24} /> Logout
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" onClick={toggleMobileMenu} className="flex items-center gap-2 text-[24px] font-bold">
+                <User size={28} /> Login / Register
+              </Link>
+            )}
+
+            <button className="flex items-center gap-2 text-[20px] text-[#737373] pt-2"><Search size={24} className="text-[#23A6F0]" /> Search</button>
+            
+            <Link to="/cart" onClick={toggleMobileMenu} className="flex items-center gap-2 text-[20px] text-[#737373]">
+              <ShoppingCart size={24} className="text-[#23A6F0]" /> Cart ({totalItemCount})
+            </Link>
+            
+            <Link to="/wishlist" onClick={toggleMobileMenu} className="flex items-center gap-2 text-[20px] text-[#737373]">
+              <Heart size={24} className="text-[#23A6F0]" /> Wishlist ({totalWishlistCount})
+            </Link>
+          </div>
         </div>
       </div>
     </header>
