@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const API = axios.create({
-  baseURL: 'https://bandage-backend-2.onrender.com',,
+  baseURL: 'https://bandage-backend-2.onrender.com',
 });
 
 API.interceptors.request.use((config) => {
