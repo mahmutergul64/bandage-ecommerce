@@ -30,8 +30,6 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  
-  // Mobil Menü State'i
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -40,8 +38,8 @@ export default function Header() {
     }
   }, [dispatch, categories.length]);
 
-  const womanCats = categories.filter(cat => cat.gender === 'k');
-  const manCats = categories.filter(cat => cat.gender === 'e');
+  const womanCats = categories.filter(cat => cat.gender === 'k' || cat.gender === 'f' || cat.gender === 'u');
+  const manCats = categories.filter(cat => cat.gender === 'e' || cat.gender === 'm' || cat.gender === 'u');
 
   const translate = (title) => enDictionary[title] || title;
 
@@ -62,9 +60,11 @@ export default function Header() {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const token = localStorage.getItem('token') || user?.token;
+  const userName = user?.name || "My Account";
+
   return (
     <header className="w-full bg-white relative z-[1000]">
-      {/* En Üst İnce Şerit (Mobilde Gizli) */}
       <div className="hidden lg:flex bg-[#252B42] text-white py-3">
         <div className="container mx-auto px-4 max-w-[1050px] flex justify-between items-center text-xs font-bold">
           <div className="flex items-center gap-5">
@@ -90,18 +90,15 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Ana Navigasyon Alanı */}
       <div className="container mx-auto px-4 max-w-[1050px] py-4 flex justify-between items-center">
         <Link to="/" className="text-2xl font-bold text-[#252B42]">Bandage</Link>
         
-        {/* Mobil Hamburger İkonu */}
         <div className="md:hidden flex items-center">
           <button onClick={toggleMobileMenu} className="text-[#737373] hover:text-[#252B42] focus:outline-none transition-colors">
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
 
-        {/* Masaüstü Menü Linkleri (Mobilde Gizli) */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-[#737373]">
           <Link to="/" className="hover:text-[#23A6F0]">Home</Link>
           
@@ -156,16 +153,15 @@ export default function Header() {
           <Link to="/pages" className="hover:text-[#23A6F0]">Pages</Link>
         </nav>
 
-        {/* Masaüstü Sağ Taraf - Kullanıcı, Sepet, Favori (Mobilde Gizli) */}
         <div className="hidden md:flex items-center gap-4 text-[#23A6F0] font-bold text-sm">
-          {user.token ? (
+          {token ? (
             <div className="relative">
               <div 
                 className="flex items-center gap-2 bg-[#F6F6F6] px-3 py-1.5 rounded-full border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
                 onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
               >
-                <img src={user.gravatar || `https://ui-avatars.com/api/?name=${user.name}&background=23A6F0&color=fff`} className="w-6 h-6 rounded-full" alt="avatar" />
-                <span className="text-[#252B42]">{user.name}</span>
+                <img src={user?.gravatar || `https://ui-avatars.com/api/?name=${userName}&background=23A6F0&color=fff`} className="w-6 h-6 rounded-full" alt="avatar" />
+                <span className="text-[#252B42]">{userName}</span>
                 <ChevronDown size={14} className={`text-[#737373] transition-transform duration-300 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
               </div>
 
@@ -322,11 +318,11 @@ export default function Header() {
 
           <div className="flex flex-col items-center space-y-4 text-[#23A6F0] pt-4 w-full px-6">
             
-            {user.token ? (
+            {token ? (
               <div className="flex flex-col items-center gap-4 w-full border-b border-gray-100 pb-4">
                 <div className="flex items-center gap-2 text-[20px] font-bold text-[#252B42]">
-                  <img src={user.gravatar || `https://ui-avatars.com/api/?name=${user.name}&background=23A6F0&color=fff`} className="w-10 h-10 rounded-full" alt="avatar" />
-                  <span>{user.name}</span>
+                  <img src={user?.gravatar || `https://ui-avatars.com/api/?name=${userName}&background=23A6F0&color=fff`} className="w-10 h-10 rounded-full" alt="avatar" />
+                  <span>{userName}</span>
                 </div>
                 <Link to="/my-orders" onClick={toggleMobileMenu} className="flex items-center gap-2 text-[20px] text-[#737373]">
                   <Package size={24} className="text-[#23A6F0]" /> My Orders

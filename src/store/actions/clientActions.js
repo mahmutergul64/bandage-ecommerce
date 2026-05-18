@@ -1,4 +1,5 @@
 import { API } from "../../api/axiosInstance";
+
 export const SET_USER = 'SET_USER';
 export const SET_ROLES = 'SET_ROLES';
 export const SET_THEME = 'SET_THEME';
@@ -13,28 +14,31 @@ export const fetchRoles = () => async (dispatch, getState) => {
   if (getState().client.roles.length > 0) {
     return; 
   }
-
   try {
     const response = await API.get('/roles');
     dispatch(setRoles(response.data));
   } catch (error) {
-    console.error("Roller çekilirken hata oluştu (Thunk):", error);
+    console.error(error);
   }
 };
 
 export const loginUser = (credentials, rememberMe) => async (dispatch) => {
   try {
-    const response = await API.post('/login', credentials);
+    const response = await API.post('/auth/login', credentials);
+    const token = response.data;
+
+    const userData = {
+      email: credentials.email,
+      name: credentials.email.split('@')[0],
+      token: token
+    };
     
-    dispatch(setUser(response.data));
+    dispatch(setUser(userData));
+    localStorage.setItem('token', token);
 
-    if (rememberMe) {
-      localStorage.setItem('token', response.data.token);
-    }
-
-    return response.data;
+    return userData;
   } catch (error) {
-    console.error("Login Hatası:", error);
+    console.error(error);
     throw error;
   }
 };
@@ -50,19 +54,15 @@ export const verifyToken = () => async (dispatch) => {
   if (!token) return;
 
   try {
-    API.defaults.headers.common['Authorization'] = token;
-
-    const response = await API.get('/verify');
-
-    dispatch(setUser(response.data));
-
-    localStorage.setItem('token', response.data.token);
-    API.defaults.headers.common['Authorization'] = response.data.token;
-
+    const userData = {
+      token: token,
+      name: "My Account" 
+    };
+    
+    dispatch(setUser(userData));
   } catch (error) {
-    console.error("Token doğrulama başarısız:", error);
+    console.error(error);
     localStorage.removeItem('token');
-    delete API.defaults.headers.common['Authorization'];
     dispatch(setUser({}));
   }
 };

@@ -39,29 +39,35 @@ export default function CreateOrderPage() {
   const shippingDiscount = isFreeShipping && productsTotal > 0 ? 29.99 : 0;
   const grandTotal = productsTotal > 0 ? (productsTotal + shippingCost - shippingDiscount) : 0;
 
+  const currentToken = localStorage.getItem('token') || user?.token;
+
+  const getAuthHeaders = () => {
+    if (!currentToken) return { headers: {} };
+    const formattedToken = currentToken.startsWith('Bearer ') ? currentToken : `Bearer ${currentToken}`;
+    return { headers: { Authorization: formattedToken } };
+  };
+
   useEffect(() => {
-    if (!user.token) {
+    if (!currentToken) {
       navigate('/login');
     }
-  }, [user.token, navigate]);
+  }, [currentToken, navigate]);
 
   useEffect(() => {
-    if (user.token) {
+    if (currentToken) {
       fetchAddresses();
     }
-  }, [user.token]);
+  }, [currentToken]);
 
   useEffect(() => {
-    if (user.token && activeTab === 'payment') {
+    if (currentToken && activeTab === 'payment') {
       fetchCards();
     }
-  }, [user.token, activeTab]);
+  }, [currentToken, activeTab]);
 
   const fetchAddresses = () => {
     setIsAddressLoading(true);
-    API.get('/user/address', {
-      headers: { Authorization: user.token }
-    })
+    API.get('/user/address', getAuthHeaders())
     .then(res => {
       setAddresses(res.data);
       if (res.data.length > 0 && !selectedAddressId) setSelectedAddressId(res.data[0].id);
@@ -76,8 +82,8 @@ export default function CreateOrderPage() {
     e.preventDefault();
     const endpoint = '/user/address';
     const req = editingAddressId 
-      ? API.put(endpoint, { id: editingAddressId, ...addressFormData }, { headers: { Authorization: user.token } })
-      : API.post(endpoint, addressFormData, { headers: { Authorization: user.token } });
+      ? API.put(endpoint, { id: editingAddressId, ...addressFormData }, getAuthHeaders())
+      : API.post(endpoint, addressFormData, getAuthHeaders());
 
     req.then(() => { setIsAddressModalOpen(false); fetchAddresses(); })
        .catch(err => console.error(err));
@@ -85,7 +91,7 @@ export default function CreateOrderPage() {
 
   const handleDeleteAddress = (id) => {
     if (window.confirm('Are you sure you want to delete this address?')) {
-      API.delete(`/user/address/${id}`, { headers: { Authorization: user.token } })
+      API.delete(`/user/address/${id}`, getAuthHeaders())
       .then(() => { if (selectedAddressId === id) setSelectedAddressId(null); fetchAddresses(); })
       .catch(err => console.error(err));
     }
@@ -93,7 +99,7 @@ export default function CreateOrderPage() {
 
   const fetchCards = () => {
     setIsCardLoading(true);
-    API.get('/user/card', { headers: { Authorization: user.token } })
+    API.get('/user/card', getAuthHeaders())
     .then(res => {
       setCards(res.data);
       if (res.data.length > 0 && !selectedCardId) setSelectedCardId(res.data[0].id);
@@ -114,8 +120,8 @@ export default function CreateOrderPage() {
     };
 
     const req = editingCardId 
-      ? API.put(endpoint, { id: editingCardId, ...payload }, { headers: { Authorization: user.token } })
-      : API.post(endpoint, payload, { headers: { Authorization: user.token } });
+      ? API.put(endpoint, { id: editingCardId, ...payload }, getAuthHeaders())
+      : API.post(endpoint, payload, getAuthHeaders());
 
     req.then(() => { setIsCardModalOpen(false); fetchCards(); })
        .catch(err => console.error(err));
@@ -123,7 +129,7 @@ export default function CreateOrderPage() {
 
   const handleDeleteCard = (id) => {
     if (window.confirm('Are you sure you want to delete this card?')) {
-      API.delete(`/user/card/${id}`, { headers: { Authorization: user.token } })
+      API.delete(`/user/card/${id}`, getAuthHeaders())
       .then(() => { if (selectedCardId === id) setSelectedCardId(null); fetchCards(); })
       .catch(err => console.error(err));
     }
@@ -149,9 +155,7 @@ export default function CreateOrderPage() {
       }))
     };
 
-    API.post('/order', orderPayload, {
-      headers: { Authorization: user.token }
-    })
+    API.post('/user/order', orderPayload, getAuthHeaders())
     .then(() => {
       alert('Congratulations! Your order has been successfully placed.');
       dispatch(clearCart());
@@ -163,7 +167,7 @@ export default function CreateOrderPage() {
     });
   };
 
-  if (!user.token) return null;
+  if (!currentToken) return null;
 
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA] font-sans flex flex-col relative">
@@ -394,7 +398,7 @@ export default function CreateOrderPage() {
                   <label className="text-sm font-bold text-[#252B42] mb-1 block">Expire Year</label>
                   <select required name="expire_year" value={cardFormData.expire_year} onChange={handleCardInput} className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#23A6F0]">
                     <option value="">Year</option>
-                    {[...Array(15)].map((_, i) => <option key={i} value={2024+i}>{2024+i}</option>)}
+                    {[...Array(15)].map((_, i) => <option key={i} value={2026+i}>{2026+i}</option>)}
                   </select>
                 </div>
               </div>

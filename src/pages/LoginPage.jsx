@@ -1,12 +1,10 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { loginUser } from '../store/actions/clientActions';
 import { toast } from 'react-toastify';
+import { API } from '../api/axiosInstance';
 
 export default function LoginPage() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,9 +16,14 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     try {
-      const credentials = { email: data.email, password: data.password };
+      const response = await API.post('/auth/login', {
+        email: data.email,
+        password: data.password
+      });
       
-      await dispatch(loginUser(credentials, data.rememberMe));
+      const token = response.data;
+      
+      localStorage.setItem('token', token);
       
       toast.success("Welcome back! Login successful.");
       

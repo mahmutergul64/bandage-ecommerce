@@ -30,6 +30,13 @@ export default function ProductDetailPage() {
     );
   }
 
+  const normalizedProduct = {
+    ...currentProduct,
+    images: Array.isArray(currentProduct.images) && currentProduct.images.length > 0
+      ? currentProduct.images
+      : [{ url: currentProduct.image || "https://picsum.photos/500/500" }]
+  };
+
   return (
     <div className="w-full bg-white font-sans">
       <div className="bg-[#FAFAFA] py-6">
@@ -40,7 +47,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      <ProductDetailSummary product={currentProduct} />
+      <ProductDetailSummary product={normalizedProduct} />
 
       <div className="w-full border-b border-[#ECECEC] my-8">
         <div className="container mx-auto px-4 max-w-[1050px] flex justify-center gap-8 text-sm font-bold text-[#737373]">
@@ -60,14 +67,14 @@ export default function ProductDetailPage() {
             onClick={() => setActiveTab('reviews')}
             className={`pb-6 border-b-2 transition-all ${activeTab === 'reviews' ? 'border-[#23A6F0] text-[#252B42]' : 'border-transparent'}`}
           >
-            Reviews ({currentProduct.sell_count})
+            Reviews ({normalizedProduct.sell_count || 0})
           </button>
         </div>
       </div>
 
       <div className="container mx-auto px-4 max-w-[1050px] mb-12">
         {activeTab === 'description' && (
-          <ProductDescription product={currentProduct} />
+          <ProductDescription product={normalizedProduct} />
         )}
         {activeTab === 'additional' && (
           <div className="py-12 text-[#737373] text-center font-medium">

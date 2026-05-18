@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { API } from "../api/axiosInstance";
 
 const roleTranslations = {
@@ -35,7 +36,14 @@ export default function SignUpPage() {
           setValue("role_id", customerRole.id);
         }
       })
-      .catch(error => console.error(error));
+      .catch(() => {
+        setRoles([
+          { id: 1, name: 'Müşteri', code: 'customer' },
+          { id: 2, name: 'Yönetici', code: 'admin' },
+          { id: 3, name: 'Mağaza', code: 'store' }
+        ]);
+        setValue("role_id", 1);
+      });
   }, [setValue]);
 
   const selectedRole = roles.find(r => r.id == selectedRoleId);
@@ -48,7 +56,7 @@ export default function SignUpPage() {
       name: data.name,
       email: data.email,
       password: data.password,
-      role_id: data.role_id,
+      role: { id: parseInt(data.role_id) }
     };
 
     if (isStore) {
@@ -61,10 +69,10 @@ export default function SignUpPage() {
     }
 
     try {
-      await API.post('/signup', payload);
+      await API.post('/auth/register', payload);
       
-      alert("You need to click link in email to activate your account!");
-      navigate(-1); 
+      toast.success("Registration successful! You can now log in.");
+      navigate('/login'); 
       
     } catch (error) {
       setApiError(error.response?.data?.message || "An error occurred during registration.");

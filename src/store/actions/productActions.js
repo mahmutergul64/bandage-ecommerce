@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { API } from "../../api/axiosInstance";
 
 export const SET_CATEGORIES = 'SET_CATEGORIES';
@@ -17,13 +16,12 @@ export const setLimit = (limit) => ({ type: SET_LIMIT, payload: limit });
 export const setOffset = (offset) => ({ type: SET_OFFSET, payload: offset });
 export const setFilter = (filter) => ({ type: SET_FILTER, payload: filter });
 
-
 export const fetchCategories = () => async (dispatch) => {
   try {
     const response = await API.get('/categories');
     dispatch(setCategories(response.data));
   } catch (error) {
-    console.error("Kategori çekme hatası:", error);
+    console.error(error);
   }
 };
 
@@ -31,25 +29,27 @@ export const fetchProducts = (params = {}) => async (dispatch) => {
   dispatch(setFetchState('FETCHING'));
   try {
     const response = await API.get('/products', { params });
-    dispatch(setProductList(response.data.products));
-    dispatch(setTotal(response.data.total));
+    
+    const products = Array.isArray(response.data) ? response.data : (response.data.products || []);
+    const total = typeof response.data.total !== 'undefined' ? response.data.total : products.length;
+
+    dispatch(setProductList(products));
+    dispatch(setTotal(total));
     dispatch(setFetchState('FETCHED'));
   } catch (error) {
     dispatch(setFetchState('FAILED'));
-    console.error("Ürün çekme hatası:", error);
+    console.error(error);
   }
 };
 
 export const fetchProductById = (productId) => async (dispatch) => {
   dispatch({ type: 'SET_CURRENT_PRODUCT_STATE', payload: 'FETCHING' });
-  
   try {
-    const response = await API.get(`/products/${productId}`)
-    
+    const response = await API.get(`/products/${productId}`);
     dispatch({ type: 'SET_CURRENT_PRODUCT', payload: response.data });
     dispatch({ type: 'SET_CURRENT_PRODUCT_STATE', payload: 'FETCHED' });
   } catch (error) {
-    console.error("Ürün detayı çekilirken hata oluştu:", error);
+    console.error(error);
     dispatch({ type: 'SET_CURRENT_PRODUCT_STATE', payload: 'FAILED' });
   }
 };

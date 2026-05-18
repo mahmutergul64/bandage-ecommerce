@@ -9,6 +9,18 @@ import FilterBar from '../components/shop/FilterBar';
 import Pagination from '../components/shop/Pagination';
 import BrandLogos from '../components/shop/BrandLogos';
 
+const enDictionary = {
+  'Tişört': 'T-Shirt',
+  'Ayakkabı': 'Shoes',
+  'Ceket': 'Jacket',
+  'Elbise': 'Dress',
+  'Etek': 'Skirt',
+  'Gömlek': 'Shirt',
+  'Kazak': 'Sweater',
+  'Pantalon': 'Pants',
+  'Pantolon': 'Pants'
+};
+
 export default function ShopPage() {
   const { categoryId } = useParams();
   const dispatch = useDispatch();
@@ -20,10 +32,11 @@ export default function ShopPage() {
   const [offset, setOffset] = useState(0);
   const limit = 16;
 
-  const totalPages = Math.ceil(total / limit);
+  const totalPages = Math.ceil(total / limit) || 1;
   const currentPage = Math.floor(offset / limit) + 1;
 
   const createSlug = (text) => {
+    if (!text) return 'product';
     return text.toLowerCase()
       .replaceAll('ü', 'u').replaceAll('ö', 'o').replaceAll('ı', 'i')
       .replaceAll('ş', 's').replaceAll('ğ', 'g').replaceAll('ç', 'c')
@@ -54,12 +67,13 @@ export default function ShopPage() {
   };
 
   const handleProductClick = (product) => {
-    const category = categories.find(c => c.id === product.category_id);
+    const pCatId = product.category?.id || product.category_id;
+    const category = categories.find(c => c.id === pCatId);
     const gender = category?.gender === 'k' ? 'kadin' : 'erkek';
     const catName = category ? category.code.split(':')[1] : 'urun';
     const slug = createSlug(product.name);
     
-    navigate(`/shop/${gender}/${catName}/${product.category_id}/${slug}/${product.id}`);
+    navigate(`/shop/${gender}/${catName}/${pCatId}/${slug}/${product.id}`);
   };
 
   const handleFirstPage = () => { setOffset(0); window.scrollTo({ top: 400, behavior: 'smooth' }); };
@@ -80,17 +94,17 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 max-w-[1050px] pb-12">
-        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {topCategories.map((cat) => (
-            <CategoryCard 
-              key={cat.id} 
-              category={cat} 
-              onClick={() => navigate(`/shop/${cat.gender === 'k' ? 'kadin' : 'erkek'}/${cat.code.split(':')[1]}/${cat.id}`)} 
-            />
-          ))}
-        </div>
-      </div>
+          <div className="container mx-auto px-4 max-w-[1050px] pb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {topCategories.map((cat) => (
+                <CategoryCard 
+                  key={cat.id} 
+                  category={cat} 
+                  onClick={() => navigate(`/shop/${cat.gender === 'k' ? 'kadin' : 'erkek'}/${cat.code.split(':')[1]}/${cat.id}`)} 
+                />
+              ))}
+            </div>
+          </div>
 
       <FilterBar 
         total={total}
@@ -117,7 +131,7 @@ export default function ShopPage() {
                 >
                   <div className="w-full h-[350px] mb-4 overflow-hidden bg-[#f3f3f3]">
                     <img 
-                      src={product.images[0].url} 
+                      src={product.image || product.images?.[0]?.url || "https://picsum.photos/500/500"} 
                       alt={product.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                     />
