@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { API } from "../api/axiosInstance";
 
-const roleTranslations = {
-  'Yönetici': 'Admin',
-  'Mağaza': 'Store',
-  'Müşteri': 'Customer'
-};
+const ROLES = [
+  { id: 1, name: 'Customer', code: 'customer' },
+  { id: 2, name: 'Admin', code: 'admin' },
+  { id: 3, name: 'Store', code: 'store' }
+];
 
 export default function SignUpPage() {
-  const [roles, setRoles] = useState([]);
   const [apiError, setApiError] = useState("");
   const navigate = useNavigate();
 
@@ -19,34 +18,17 @@ export default function SignUpPage() {
     register, 
     handleSubmit, 
     watch,
-    setValue,
     formState: { errors, isSubmitting }
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      role_id: 1
+    }
+  });
 
   const password = watch("password");
-  
   const selectedRoleId = watch("role_id");
 
-  useEffect(() => {
-    API.get('/roles')
-      .then(response => {
-        setRoles(response.data);
-        const customerRole = response.data.find(role => role.code === 'customer');
-        if (customerRole) {
-          setValue("role_id", customerRole.id);
-        }
-      })
-      .catch(() => {
-        setRoles([
-          { id: 1, name: 'Müşteri', code: 'customer' },
-          { id: 2, name: 'Yönetici', code: 'admin' },
-          { id: 3, name: 'Mağaza', code: 'store' }
-        ]);
-        setValue("role_id", 1);
-      });
-  }, [setValue]);
-
-  const selectedRole = roles.find(r => r.id == selectedRoleId);
+  const selectedRole = ROLES.find(r => r.id == selectedRoleId);
   const isStore = selectedRole && selectedRole.code === 'store';
 
   const onSubmit = async (data) => {
@@ -171,9 +153,9 @@ export default function SignUpPage() {
                   {...register("role_id", { required: "Role is required" })}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#23A6F0] focus:border-[#23A6F0] sm:text-sm bg-white"
                 >
-                  {roles.map((role) => (
+                  {ROLES.map((role) => (
                     <option key={role.id} value={role.id}>
-                      {roleTranslations[role.name] || role.name}
+                      {role.name}
                     </option>
                   ))}
                 </select>
