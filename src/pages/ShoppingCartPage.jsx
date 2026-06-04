@@ -35,6 +35,18 @@ export default function ShoppingCartPage() {
     dispatch(updateCartItemCount(item.product.id, item.count + 1));
   };
 
+  const placeholderImages = [
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600",
+    "https://images.unsplash.com/photo-1434389670869-c6e460489e9a?q=80&w=600",
+    "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600",
+    "https://images.unsplash.com/photo-1571513722275-4b41e4aee0ce?q=80&w=600",
+    "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=600",
+    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600"
+  ];
+
+  // (YENİ!) SON KALE: Unsplash yedeği bile patlarsa gri yazı değil, bu şık görsel çıkacak!
+  const FINAL_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1521577352947-9bb58764b69a?q=80&w=600&auto=format&fit=crop";
+
   return (
     <div className="w-full min-h-screen bg-[#FAFAFA] font-sans flex flex-col">
       <div className="container mx-auto px-4 max-w-[1050px] py-8 flex-1">
@@ -75,7 +87,18 @@ export default function ShoppingCartPage() {
                 </div>
               )}
 
-              {cart.map((item) => (
+              {cart.map((item) => {
+                let safeIndex = 0;
+                if (typeof item.product.id === 'number') {
+                  safeIndex = item.product.id % placeholderImages.length;
+                } else if (item.product.id) {
+                  safeIndex = String(item.product.id).charCodeAt(0) % placeholderImages.length;
+                }
+                const variedPlaceholder = placeholderImages[safeIndex];
+
+                const originalImg = item.product.image || (item.product.images?.length > 0 ? item.product.images[0].url : null) || variedPlaceholder;
+
+                return (
                 <div key={item.product.id} className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-4 relative transition-all hover:shadow-md">
                   
                   <input 
@@ -85,8 +108,23 @@ export default function ShoppingCartPage() {
                     className="w-5 h-5 accent-[#23A6F0] cursor-pointer mt-2 sm:mt-0"
                   />
                   
-                  <div className="w-24 h-24 sm:w-20 sm:h-20 flex-shrink-0 border border-gray-100 rounded-md overflow-hidden bg-gray-50">
-                    <img src={item.product.images?.[0]?.url} alt={item.product.name} className="w-full h-full object-cover" />
+                  <div className="w-24 h-24 sm:w-20 sm:h-20 flex-shrink-0 border border-gray-100 rounded-md overflow-hidden bg-gray-50 flex items-center justify-center">
+                    
+                    {/* ZIRH GÜNCELLENDİ: Asla "Görsel Yok" demez! */}
+                    <img 
+                      src={originalImg} 
+                      alt={item.product.name} 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => { 
+                        if (e.target.src !== variedPlaceholder && e.target.src !== FINAL_FALLBACK_IMAGE) {
+                          e.target.src = variedPlaceholder; 
+                        } else if (e.target.src === variedPlaceholder) {
+                          // Unsplash 1. yedek çökerse, direkt standart Son Kale kıyafet resmine geç:
+                          e.target.src = FINAL_FALLBACK_IMAGE;
+                        }
+                      }}
+                    />
+
                   </div>
 
                   <div className="flex-1 flex flex-col gap-1 w-full">
@@ -95,7 +133,6 @@ export default function ShoppingCartPage() {
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-6 mt-4 sm:mt-0">
-                    
                     <div className="flex items-center border border-gray-200 rounded-md bg-white">
                       <button onClick={() => handleDecrease(item)} className="p-2 text-[#737373] hover:text-[#252B42] hover:bg-gray-50 transition-colors">
                         <Minus size={16} />
@@ -118,7 +155,7 @@ export default function ShoppingCartPage() {
                     </button>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
 
             <div className="w-full lg:w-1/3">

@@ -7,13 +7,29 @@ import { toast } from 'react-toastify';
 
 export default function ProductDetailSummary({ product }) {
   const [activeImgIndex, setActiveImgIndex] = useState(0);
-  
   const dispatch = useDispatch();
   
   const wishlist = useSelector((state) => state.wishlist.wishlistItems);
-  const isFavorite = wishlist.some(item => item.id === product.id);
+  const isFavorite = wishlist.some(item => item?.id === product?.id);
 
-  const images = product?.images || [];
+  if (!product) return null;
+
+  const placeholderImages = [
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600",
+    "https://images.unsplash.com/photo-1434389670869-c6e460489e9a?q=80&w=600",
+    "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600",
+    "https://images.unsplash.com/photo-1571513722275-4b41e4aee0ce?q=80&w=600",
+    "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=600",
+    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600"
+  ];
+
+  const randomImageIndex = product.id % placeholderImages.length;
+  const variedPlaceholder = placeholderImages[randomImageIndex];
+  const FINAL_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1521577352947-9bb58764b69a?q=80&w=600&auto=format&fit=crop";
+
+  const images = (product?.images && product.images.length > 0)
+    ? product.images
+    : [{ url: product?.image || variedPlaceholder }];
 
   const handleNext = () => setActiveImgIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   const handlePrev = () => setActiveImgIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -32,38 +48,51 @@ export default function ProductDetailSummary({ product }) {
     }
   };
 
-  if (!product) return null;
-
   return (
     <div className="container mx-auto px-4 max-w-[1050px] py-8">
       <div className="flex flex-col md:flex-row gap-12">
         
         <div className="w-full md:w-1/2 flex flex-col gap-4">
-          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-[#f3f3f3]">
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-[#f3f3f3] flex items-center justify-center">
             <img 
               src={images[activeImgIndex]?.url} 
               alt={product.name}
               className="h-full w-full object-cover transition-opacity duration-300"
+              onError={(e) => { 
+                if (e.target.src !== variedPlaceholder) e.target.src = variedPlaceholder;
+                else e.target.src = FINAL_FALLBACK_IMAGE; 
+              }}
             />
-            <button onClick={handlePrev} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors">
-              <ChevronLeft size={48} strokeWidth={1.5} />
-            </button>
-            <button onClick={handleNext} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors">
-              <ChevronRight size={48} strokeWidth={1.5} />
-            </button>
+            {images.length > 1 && (
+              <>
+                <button onClick={handlePrev} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors bg-black/20 rounded-full p-1 hover:bg-black/40">
+                  <ChevronLeft size={32} strokeWidth={2} />
+                </button>
+                <button onClick={handleNext} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white transition-colors bg-black/20 rounded-full p-1 hover:bg-black/40">
+                  <ChevronRight size={32} strokeWidth={2} />
+                </button>
+              </>
+            )}
           </div>
           
-          <div className="flex gap-4">
-            {images.map((img, idx) => (
-              <div 
-                key={idx} 
-                onClick={() => setActiveImgIndex(idx)}
-                className={`w-24 h-24 cursor-pointer rounded-md overflow-hidden border-2 transition-all ${activeImgIndex === idx ? 'border-[#23A6F0]' : 'border-transparent opacity-60 hover:opacity-100'}`}
-              >
-                <img src={img.url} className="w-full h-full object-cover" alt="thumbnail" />
-              </div>
-            ))}
-          </div>
+          {images.length > 0 && (
+            <div className="flex gap-4">
+              {images.map((img, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => setActiveImgIndex(idx)}
+                  className={`w-24 h-24 cursor-pointer rounded-md overflow-hidden border-2 transition-all ${activeImgIndex === idx ? 'border-[#23A6F0]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                >
+                  <img 
+                    src={img.url} 
+                    className="w-full h-full object-cover" 
+                    alt="thumbnail" 
+                    onError={(e) => { e.target.src = variedPlaceholder; }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="w-full md:w-1/2 pt-4">
@@ -72,10 +101,10 @@ export default function ProductDetailSummary({ product }) {
           <div className="flex items-center gap-2 mb-6">
             <div className="flex text-[#F3CD03]">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} fill={i < Math.floor(product.rating) ? "currentColor" : "none"} size={18} />
+                <Star key={i} fill={i < Math.floor(product.rating || 4) ? "currentColor" : "none"} size={18} />
               ))}
             </div>
-            <span className="font-bold text-sm text-[#737373]">{product.sell_count} Reviews</span>
+            <span className="font-bold text-sm text-[#737373]">{product.sell_count || 10} Reviews</span>
           </div>
 
           <h3 className="text-2xl font-bold text-[#252B42] mb-2">${product.price}</h3>
@@ -90,10 +119,10 @@ export default function ProductDetailSummary({ product }) {
           </p>
 
           <div className="flex items-center gap-2 mb-12">
-            <div className="w-8 h-8 rounded-full bg-[#23A6F0] cursor-pointer hover:scale-110 transition-transform"></div>
-            <div className="w-8 h-8 rounded-full bg-[#2EBB77] cursor-pointer hover:scale-110 transition-transform"></div>
-            <div className="w-8 h-8 rounded-full bg-[#E77C40] cursor-pointer hover:scale-110 transition-transform"></div>
-            <div className="w-8 h-8 rounded-full bg-[#252B42] cursor-pointer hover:scale-110 transition-transform"></div>
+            <div className="w-8 h-8 rounded-full bg-[#23A6F0] cursor-pointer hover:scale-110 transition-transform shadow-sm"></div>
+            <div className="w-8 h-8 rounded-full bg-[#2EBB77] cursor-pointer hover:scale-110 transition-transform shadow-sm"></div>
+            <div className="w-8 h-8 rounded-full bg-[#E77C40] cursor-pointer hover:scale-110 transition-transform shadow-sm"></div>
+            <div className="w-8 h-8 rounded-full bg-[#252B42] cursor-pointer hover:scale-110 transition-transform shadow-sm"></div>
           </div>
 
           <div className="flex items-center gap-3">

@@ -1,15 +1,14 @@
-import React, { useEffect } from 'react';
-import ContactCallToAction from '../components/contact/ContactCallToAction';
+import React from 'react';
+import ContactHero from '../components/contact/ContactHero';
+import ContactOffice from '../components/contact/ContactOffice';
+import ContactCTA from '../components/contact/ContactCTA';
 
 export default function ContactPage() {
-  
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   return (
-    <div className="w-full bg-white animate-fadeIn">
-      <ContactCallToAction />
+    <div className="bg-white min-h-screen flex flex-col">
+      <ContactHero />
+      <ContactOffice />
+      <ContactCTA />
     </div>
   );
 }

@@ -25,7 +25,7 @@ export const fetchRoles = () => async (dispatch, getState) => {
 export const loginUser = (credentials, rememberMe) => async (dispatch) => {
   try {
     const response = await API.post('/auth/login', credentials);
-    const token = response.data;
+    const token = response.data.token || response.data;
 
     const userData = {
       email: credentials.email,
@@ -54,9 +54,16 @@ export const verifyToken = () => async (dispatch) => {
   if (!token) return;
 
   try {
+    const payloadBase64 = token.split('.')[1];
+    const decodedPayload = JSON.parse(window.atob(payloadBase64));
+    
+    const email = decodedPayload.sub || decodedPayload.email || '';
+    const name = email ? email.split('@')[0] : 'My Account';
+
     const userData = {
-      token: token,
-      name: "My Account" 
+      email: email,
+      name: name,
+      token: token
     };
     
     dispatch(setUser(userData));

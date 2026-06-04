@@ -1,5 +1,5 @@
-import { useEffect } from 'react'; // <-- EKLENDİ
-import { useDispatch } from 'react-redux'; // <-- EKLENDİ
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -19,6 +19,8 @@ import LoginPage from './pages/LoginPage';
 import ShoppingCartPage from './pages/ShoppingCartPage';
 import CreateOrderPage from './pages/CreateOrderPage';
 import PreviousOrdersPage from './pages/PreviousOrdersPage';
+import BlogPage from './pages/BlogPage';
+import PricingPage from './pages/PricingPage';
 
 function App() {
   const dispatch = useDispatch();
@@ -49,6 +51,9 @@ function App() {
           <Route path="/cart" element={<ShoppingCartPage />} />
           <Route path="/create-order" element={<CreateOrderPage />} />
           <Route path="/my-orders" element={<PreviousOrdersPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
         </Routes>
       </main>
 

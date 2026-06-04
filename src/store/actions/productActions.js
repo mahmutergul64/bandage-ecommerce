@@ -38,7 +38,7 @@ export const fetchProducts = (params = {}) => async (dispatch) => {
     dispatch(setFetchState('FETCHED'));
   } catch (error) {
     dispatch(setFetchState('FAILED'));
-    console.error(error);
+    console.error("Ürünler çekilirken hata:", error);
   }
 };
 

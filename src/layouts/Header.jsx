@@ -38,8 +38,8 @@ export default function Header() {
     }
   }, [dispatch, categories.length]);
 
-  const womanCats = categories.filter(cat => cat.gender === 'k' || cat.gender === 'f' || cat.gender === 'u');
-  const manCats = categories.filter(cat => cat.gender === 'e' || cat.gender === 'm' || cat.gender === 'u');
+  const womanCats = categories.filter(cat => cat.gender === 'k' || cat.gender === 'u');
+  const manCats = categories.filter(cat => cat.gender === 'e' || cat.gender === 'u');
 
   const translate = (title) => enDictionary[title] || title;
 
@@ -62,6 +62,16 @@ export default function Header() {
 
   const token = localStorage.getItem('token') || user?.token;
   const userName = user?.name || "My Account";
+
+  const placeholderImages = [
+    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600",
+    "https://images.unsplash.com/photo-1434389670869-c6e460489e9a?q=80&w=600",
+    "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=600",
+    "https://images.unsplash.com/photo-1571513722275-4b41e4aee0ce?q=80&w=600",
+    "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?q=80&w=600",
+    "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=600"
+  ];
+  const FINAL_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1521577352947-9bb58764b69a?q=80&w=600&auto=format&fit=crop";
 
   return (
     <header className="w-full bg-white relative z-[1000]">
@@ -150,7 +160,7 @@ export default function Header() {
           <Link to="/team" className="text-[#737373] font-bold hover:text-[#23A6F0]">Team</Link>
           <Link to="/blog" className="hover:text-[#23A6F0]">Blog</Link>
           <Link to="/contact" className="hover:text-[#23A6F0]">Contact</Link>
-          <Link to="/pages" className="hover:text-[#23A6F0]">Pages</Link>
+          <Link to="/pricing" className="hover:text-[#23A6F0]">Pricing</Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-4 text-[#23A6F0] font-bold text-sm">
@@ -215,12 +225,30 @@ export default function Header() {
                   {cart.length === 0 ? (
                     <p className="text-[#737373] text-center font-normal py-6">Your cart is empty.</p>
                   ) : (
-                    cart.map((item, index) => (
+                    cart.map((item, index) => {
+                      // SEPET AÇILIR KUTU ZIRHI
+                      let safeIndex = 0;
+                      if (typeof item.product.id === 'number') {
+                        safeIndex = item.product.id % placeholderImages.length;
+                      } else if (item.product.id) {
+                        safeIndex = String(item.product.id).charCodeAt(0) % placeholderImages.length;
+                      }
+                      const variedPlaceholder = placeholderImages[safeIndex];
+                      const originalImg = item.product.image || (item.product.images?.length > 0 ? item.product.images[0].url : null) || variedPlaceholder;
+
+                      return (
                       <div key={index} className="flex gap-4 items-center">
                         <img 
-                          src={item.product.images?.[0]?.url} 
-                          alt="product" 
+                          src={originalImg} 
+                          alt={item.product.name} 
                           className="w-16 h-20 object-cover border border-gray-100 rounded-md bg-[#f3f3f3]" 
+                          onError={(e) => { 
+                            if (e.target.src !== variedPlaceholder && e.target.src !== FINAL_FALLBACK_IMAGE) {
+                              e.target.src = variedPlaceholder; 
+                            } else if (e.target.src === variedPlaceholder) {
+                              e.target.src = FINAL_FALLBACK_IMAGE;
+                            }
+                          }}
                         />
                         <div className="flex flex-col flex-1">
                           <span className="text-[#252B42] font-bold text-sm line-clamp-2 leading-tight">
@@ -234,7 +262,7 @@ export default function Header() {
                           </span>
                         </div>
                       </div>
-                    ))
+                    )})
                   )}
                 </div>
 
@@ -277,12 +305,29 @@ export default function Header() {
                   {wishlist.length === 0 ? (
                     <p className="text-[#737373] text-center font-normal py-6">Your wishlist is empty.</p>
                   ) : (
-                    wishlist.map((item, index) => (
+                    wishlist.map((item, index) => {
+                      let safeIndex = 0;
+                      if (typeof item.id === 'number') {
+                        safeIndex = item.id % placeholderImages.length;
+                      } else if (item.id) {
+                        safeIndex = String(item.id).charCodeAt(0) % placeholderImages.length;
+                      }
+                      const variedPlaceholder = placeholderImages[safeIndex];
+                      const originalImg = item.image || (item.images?.length > 0 ? item.images[0].url : null) || variedPlaceholder;
+
+                      return (
                       <div key={index} className="flex gap-4 items-center">
                         <img 
-                          src={item.images?.[0]?.url} 
-                          alt="product" 
+                          src={originalImg} 
+                          alt={item.name} 
                           className="w-16 h-20 object-cover border border-gray-100 rounded-md bg-[#f3f3f3]" 
+                          onError={(e) => { 
+                            if (e.target.src !== variedPlaceholder && e.target.src !== FINAL_FALLBACK_IMAGE) {
+                              e.target.src = variedPlaceholder; 
+                            } else if (e.target.src === variedPlaceholder) {
+                              e.target.src = FINAL_FALLBACK_IMAGE;
+                            }
+                          }}
                         />
                         <div className="flex flex-col flex-1">
                           <span className="text-[#252B42] font-bold text-sm line-clamp-2 leading-tight">
@@ -293,7 +338,7 @@ export default function Header() {
                           </span>
                         </div>
                       </div>
-                    ))
+                    )})
                   )}
                 </div>
               </div>
@@ -314,7 +359,7 @@ export default function Header() {
           <Link to="/about" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">About</Link>
           <Link to="/blog" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Blog</Link>
           <Link to="/contact" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Contact</Link>
-          <Link to="/pages" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Pages</Link>
+          <Link to="/pricing" onClick={toggleMobileMenu} className="text-[24px] text-[#737373] hover:text-[#23A6F0]">Pricing</Link>
 
           <div className="flex flex-col items-center space-y-4 text-[#23A6F0] pt-4 w-full px-6">
             

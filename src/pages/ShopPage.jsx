@@ -8,18 +8,7 @@ import CategoryCard from '../components/shop/CategoryCard';
 import FilterBar from '../components/shop/FilterBar';
 import Pagination from '../components/shop/Pagination';
 import BrandLogos from '../components/shop/BrandLogos';
-
-const enDictionary = {
-  'Tişört': 'T-Shirt',
-  'Ayakkabı': 'Shoes',
-  'Ceket': 'Jacket',
-  'Elbise': 'Dress',
-  'Etek': 'Skirt',
-  'Gömlek': 'Shirt',
-  'Kazak': 'Sweater',
-  'Pantalon': 'Pants',
-  'Pantolon': 'Pants'
-};
+import ShopProductCard from '../components/shop/ShopProductCard';
 
 export default function ShopPage() {
   const { categoryId } = useParams();
@@ -34,15 +23,6 @@ export default function ShopPage() {
 
   const totalPages = Math.ceil(total / limit) || 1;
   const currentPage = Math.floor(offset / limit) + 1;
-
-  const createSlug = (text) => {
-    if (!text) return 'product';
-    return text.toLowerCase()
-      .replaceAll('ü', 'u').replaceAll('ö', 'o').replaceAll('ı', 'i')
-      .replaceAll('ş', 's').replaceAll('ğ', 'g').replaceAll('ç', 'c')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-  };
 
   const fetchFilteredProducts = (currentOffset = offset) => {
     const params = { limit, offset: currentOffset };
@@ -66,16 +46,6 @@ export default function ShopPage() {
     fetchFilteredProducts(0);
   };
 
-  const handleProductClick = (product) => {
-    const pCatId = product.category?.id || product.category_id;
-    const category = categories.find(c => c.id === pCatId);
-    const gender = category?.gender === 'k' ? 'kadin' : 'erkek';
-    const catName = category ? category.code.split(':')[1] : 'urun';
-    const slug = createSlug(product.name);
-    
-    navigate(`/shop/${gender}/${catName}/${pCatId}/${slug}/${product.id}`);
-  };
-
   const handleFirstPage = () => { setOffset(0); window.scrollTo({ top: 400, behavior: 'smooth' }); };
   const handlePrevPage = () => { setOffset(offset - limit); window.scrollTo({ top: 400, behavior: 'smooth' }); };
   const handleNextPage = () => { setOffset(offset + limit); window.scrollTo({ top: 400, behavior: 'smooth' }); };
@@ -85,6 +55,7 @@ export default function ShopPage() {
 
   return (
     <div className="w-full font-sans bg-[#FAFAFA] overflow-x-hidden">
+      
       <div className="container mx-auto px-4 max-w-[1050px] py-6 flex flex-col gap-2">
         <h2 className="text-2xl font-bold text-[#252B42]">Shop</h2>
         <div className="flex items-center gap-3 font-bold text-sm">
@@ -94,24 +65,24 @@ export default function ShopPage() {
         </div>
       </div>
 
-          <div className="container mx-auto px-4 max-w-[1050px] pb-12">
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
-              {topCategories.map((cat) => (
-                <CategoryCard 
-                  key={cat.id} 
-                  category={cat} 
-                  onClick={() => navigate(`/shop/${cat.gender === 'k' ? 'kadin' : 'erkek'}/${cat.code.split(':')[1]}/${cat.id}`)} 
-                />
-              ))}
-            </div>
-          </div>
+      <div className="container mx-auto px-4 max-w-[1050px] pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          {topCategories.map((cat) => (
+            <CategoryCard 
+              key={cat.id} 
+              category={cat} 
+              onClick={() => navigate(`/shop/${cat.gender === 'k' ? 'kadin' : 'erkek'}/${cat.code.split(':')[1]}/${cat.id}`)} 
+            />
+          ))}
+        </div>
+      </div>
 
       <FilterBar 
         total={total}
         filterText={filterText}
         setFilterText={setFilterText}
         sortOption={sortType}
-        setSortOption={setSortType}
+        setSortOption={setSortOption => setSortType(setSortOption)}
         onFilter={handleFilter}
       />
 
@@ -124,33 +95,10 @@ export default function ShopPage() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-16">
               {productList.map((product) => (
-                <div 
-                  key={product.id} 
-                  className="flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleProductClick(product)}
-                >
-                  <div className="w-full h-[350px] mb-4 overflow-hidden bg-[#f3f3f3]">
-                    <img 
-                      src={product.image || product.images?.[0]?.url || "https://picsum.photos/500/500"} 
-                      alt={product.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                    />
-                  </div>
-                  <h5 className="font-bold text-[#252B42] text-base mb-2">{product.name}</h5>
-                  <p className="text-sm font-bold text-[#737373] mb-3 text-center line-clamp-1">{product.description}</p>
-                  <div className="flex justify-center gap-2 font-bold mb-4">
-                    <span className="text-[#BDBDBD]">${product.price}</span>
-                    <span className="text-[#23856D]">${(product.price * 0.8).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-center gap-1.5">
-                    <div className="w-4 h-4 rounded-full bg-[#23A6F0]"></div>
-                    <div className="w-4 h-4 rounded-full bg-[#23856D]"></div>
-                    <div className="w-4 h-4 rounded-full bg-[#E77C40]"></div>
-                    <div className="w-4 h-4 rounded-full bg-[#252B42]"></div>
-                  </div>
-                </div>
+                <ShopProductCard key={product.id} product={product} />
               ))}
             </div>
+
             <Pagination 
               currentPage={currentPage}
               totalPages={totalPages}
@@ -162,6 +110,7 @@ export default function ShopPage() {
           </>
         )}
       </div>
+
       <BrandLogos />
     </div>
   );

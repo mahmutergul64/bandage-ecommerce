@@ -10,7 +10,7 @@ import ProductPageBestseller from '../components/product/ProductPageBestseller';
 import BrandLogos from '../components/shop/BrandLogos';
 
 export default function ProductDetailPage() {
-  const { productId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('description');
@@ -18,9 +18,11 @@ export default function ProductDetailPage() {
   const { currentProduct, currentProductFetchState } = useSelector(state => state.product);
 
   useEffect(() => {
-    dispatch(fetchProductById(productId));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [dispatch, productId]);
+    if (id) {
+      dispatch(fetchProductById(id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [dispatch, id]);
 
   if (currentProductFetchState === 'FETCHING' || !currentProduct) {
     return (
